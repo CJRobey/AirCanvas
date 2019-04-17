@@ -154,13 +154,20 @@ def draw_circles(frame, traverse_point):
 
 
 def manage_image_opr(frame, hand_hist):
-    hist_mask_image = hist_masking(frame, hand_hist)
-    contour_list = contours(hist_mask_image)
-    max_cont = max_contour(contour_list)
-
-    cnt_centroid = centroid(max_cont)
-    cv2.circle(frame, cnt_centroid, 5, [255, 0, 255], -1)
-
+    cnt_centroid = []
+    for hist in hand_hist:
+        hist_mask_image = hist_masking(frame, hist)
+        contour_list = contours(hist_mask_image)
+        max_cont = max_contour(contour_list)
+        this_centroid = centroid(max_cont)
+        if this_centroid is not None:
+            cnt_centroid += [this_centroid]
+    fin_cent = np.zeros(3).astype(int)
+    for cent in cnt_centroid:
+        fin_cent[0] += int(cent[0]*1.0/len(cnt_centroid))
+        fin_cent[1] += int(cent[1]*1.0/len(cnt_centroid))
+    ret_centroid = tuple((fin_cent[0], fin_cent[1]))
+    cv2.circle(frame, ret_centroid, 5, [255, 0, 255], -1)
 #    if max_cont is not None:
 #        hull = cv2.convexHull(max_cont, returnPoints=False)
 #        defects = cv2.convexityDefects(max_cont, hull)
@@ -175,7 +182,7 @@ def manage_image_opr(frame, hand_hist):
 
         # removed the yellow circles from the detection
         #draw_circles(frame, traverse_point)
-    return cnt_centroid
+    return ret_centroid
 
 
 def main():

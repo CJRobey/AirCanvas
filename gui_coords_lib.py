@@ -27,6 +27,7 @@ def get_normed_3d_coord(far_point, frame_shape, gs, final_scale=1, rel_tp = None
         # to scale properly.
         draw_point[0] = x_scale - (far_point[0]/frame_shape[1]*x_scale)
         draw_point[1] = y_scale - (far_point[1]/frame_shape[0]*y_scale)
+        print('current DM val: ', gs[far_point])
         if rel_tp is None:
             draw_point[2] = (gs[far_point]*final_scale)
         else:
@@ -36,7 +37,7 @@ def get_normed_3d_coord(far_point, frame_shape, gs, final_scale=1, rel_tp = None
             print('out of depth map range')
 
         # normalize this depth map point relative to the top percentile of the data
-        draw_point[2] = (draw_point[2]*1.0)/np.percentile(gs,90)
+        draw_point[2] = (draw_point[2]*1.0)/np.percentile(gs,98)
         if (draw_point[2] > 1):
             draw_point[2] = 1
     

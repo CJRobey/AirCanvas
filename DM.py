@@ -24,7 +24,7 @@
 
 
 from picamera import PiCamera
-import time
+import time, os
 import cv2
 import numpy as np
 import json
@@ -238,12 +238,17 @@ def main():
         #disparity, ft, gs = stereo_depth_map(rectified_pair_gr)
         
         # this can be threaded
-
+        if os.path.exists('./hand_hist.npy') and not is_hand_hist_created:
+            is_hand_hist_created = True
+            hand_hists =[np.load('./hand_hist.npy')]
         if ((uart_val[0] & 0x01) == 0x01) or (pressed_key & 0xFF == ord('z')) and (not is_hand_hist_created):
             is_hand_hist_created = True
             hand_hist = hand_histogram(imgLeft)
+            np.save('hand_hist_far', hand_hist)
         if is_hand_hist_created:
-            far_point = manage_image_opr(imgLeft, hand_hist)
+            t1 = datetime.now()
+            far_point = manage_image_opr(imgLeft, hand_hists)
+            print('Finger detection time: ', datetime.now() - t1)
             if far_point is None:
                 far_point = (100000, 100000)
                 print("No touch point detected")

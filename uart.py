@@ -17,7 +17,7 @@ def cont_get_value(uart_val):
 
 def main():
     while True:
-        time.sleep(1)
+        #time.sleep(1)
         value = readchar(port)
         print(value)
         value = int.from_bytes(value, byteorder='little')
