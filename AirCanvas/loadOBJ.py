@@ -15,7 +15,7 @@ rotation = 0
 meshes = pywavefront.Wavefront("model.obj")
 window = pyglet.window.Window()
 lightfv = ctypes.c_float *4
-
+uart_val= [0]
 
 @window.event
 def on_resize(width, height):
@@ -27,6 +27,7 @@ def on_resize(width, height):
 
 @window.event
 def on_draw():
+    global meshes
     window.clear()
     glLoadIdentity()
 
@@ -46,17 +47,25 @@ def on_draw():
 def update(dt):
     global rotation
     global meshes
-    rotation += 90.0 * dt
-
+    global uart_val
+    #print(uart_val[0])
+    if ((uart_val[0] & 0x10) == 0x10):
+        rotation += 30.0
+    if((uart_val[0] & 0x20) == 0x20):
+        rotation -= 30.0
     if rotation > 720.0:
         rotation = 0.0
-
-
+    if rotation < 0:
+        rotation = 720
 pyglet.clock.schedule(update)
-obj_t = threading.Thread(target=pyglet.app.run)
-obj_t.daemon = True
+#obj_t = threading.Thread(target=pyglet.app.run)
+#obj_t.daemon = True
+
+def start():
+    pyglet.app.run()
+
 if __name__ == '__main__':
-    obj_t.start()
+    #obj_t.start()
    # while(True):
    #     print('h')
-    #pyglet.app.run()
+    pyglet.app.run()

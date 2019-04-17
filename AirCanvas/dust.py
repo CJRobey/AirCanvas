@@ -5,7 +5,6 @@ import time
 import random
 import uuid
 
-
 class dust:
     global s
     def __init__(self, TCP_IP = '127.0.0.1'):
@@ -85,8 +84,8 @@ class dust:
                 f = open("model.obj", "w+")
                 f.write((binascii.unhexlify(reply_))[14:].decode('utf8'))
                 f.close()
-
                 
         else:
             return -1
+
 

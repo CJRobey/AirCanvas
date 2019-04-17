@@ -86,9 +86,7 @@ def hist_masking(frame, hist):
     cv2.filter2D(dst, -1, disc, dst)
 
     ret, thresh = cv2.threshold(dst, 150, 255, cv2.THRESH_BINARY)
-
     # thresh = cv2.dilate(thresh, None, iterations=5)
-
     thresh = cv2.merge((thresh, thresh, thresh, thresh))
     return cv2.bitwise_and(frame, thresh)
 
@@ -160,21 +158,6 @@ def manage_image_opr(frame, hand_hist):
 
     cnt_centroid = centroid(max_cont)
     cv2.circle(frame, cnt_centroid, 5, [255, 0, 255], -1)
-
-#    if max_cont is not None:
-#        hull = cv2.convexHull(max_cont, returnPoints=False)
-#        defects = cv2.convexityDefects(max_cont, hull)
-#        far_point = farthest_point(defects, max_cont, cnt_centroid)
-#        print("Centroid : " + str(cnt_centroid) + ", farthest Point : " + str(far_point))
-#        cv2.circle(frame, far_point, 5, [0, 0, 255], -1)
-#        if len(traverse_point) < 20:
-#            traverse_point.append(far_point)
-#        else:
-#           traverse_point.pop(0)
-#           traverse_point.append(far_point)
-
-        # removed the yellow circles from the detection
-        #draw_circles(frame, traverse_point)
     return cnt_centroid
 
 

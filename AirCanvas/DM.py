@@ -38,6 +38,8 @@ from dust import *
 import gui_coords_lib
 import uart 
 import loadOBJ
+import os
+global camera
 # Depth map default preset
 SWS = 5
 PFS = 5
@@ -59,33 +61,35 @@ scale_ratio = 0.5
 # Camera resolution height must be dividable by 16, and width by 32
 cam_width = int((cam_width+31)/32)*32
 cam_height = int((cam_height+15)/16)*16
-print ("Used camera resolution: "+str(cam_width)+" x "+str(cam_height))
+print ("DM: Used camera resolution: "+str(cam_width)+" x "+str(cam_height))
 
 # Buffer for captured image settings
 img_width = int (cam_width * scale_ratio)
 img_height = int (cam_height * scale_ratio)
 capture = np.zeros((img_height, img_width, 4), dtype=np.uint8)
-print ("Scaled image resolution: "+str(img_width)+" x "+str(img_height))
+print ("DM: Scaled image resolution: "+str(img_width)+" x "+str(img_height))
 
 # Initialize the camera
-camera = PiCamera(stereo_mode='side-by-side',stereo_decimate=False)
-camera.resolution=(cam_width, cam_height)
-camera.framerate = 20
-camera.hflip = True
+#camera = PiCamera(stereo_mode='side-by-side',stereo_decimate=False)
+#camera.resolution=(cam_width, cam_height)
+#camera.framerate = 20
+#camera.hflip = True
 
 in_folder = 'newcams_calib_result'
 
 # Implementing calibration data
-print('Read calibration data and rectifying stereo pair...')
+print('DM: Read calibration data and rectifying stereo pair...')
 calibration = StereoCalibration(input_folder=in_folder)
 
 # Initialize interface windows
 cv2.namedWindow("Image")
-cv2.moveWindow("Image", 50,100)
-cv2.namedWindow("left")
-cv2.moveWindow("left", 450,100)
-cv2.namedWindow("right")
-cv2.moveWindow("right", 850,100)
+cv2.moveWindow("Image", 0,0)
+#cv2.resizeWindow("Image", cam_width, cam_height)
+cv2.namedWindow("Livestream Finger Tracking")
+#cv2.namedWindow("left")
+#cv2.moveWindow("left", 450,100)
+#cv2.namedWindow("right")
+#cv2.moveWindow("right", 850,100)
 
 
 disparity = np.zeros((img_width, img_height), np.uint8)
@@ -103,7 +107,9 @@ def stereo_depth_map(rectified_pair):
     disparity_color = cv2.applyColorMap(disparity_fixtype, cv2.COLORMAP_JET)
     #print('Disparity color size:', disparity_color.shape, '\nDisparity fixtype:', disparity_fixtype.shape,
     #      '\nDisparity grayscae:', disparity_grayscale.shape, '\n')
-    cv2.imshow("Image", disparity_color)
+    view_img = cv2.resize(disparity_color, None, fx=2, fy=2)
+    cv2.imshow("Image", view_img)
+    #cv2.imshow("Image", disparity_color)
     key = cv2.waitKey(1) & 0xFF   
     if key == ord("q"):
         quit();
@@ -202,13 +208,15 @@ def rect_images(im_l, im_r, calibration):
 
 
 def get_dm(frame, img_height, img_width, calibration):
-    imgLeft_gr, img_Right_gr = get_grayscale_lr_images(frame, img_height, img_width)
+    imgLeft_gr, imgRight_gr = get_grayscale_lr_images(frame, img_height, img_width)
     rectified = rect_images(imgLeft_gr, imgRight_gr, calibration)
     disparity, ft, gs = stereo_depth_map(rectified)
     return disparity, ft, gs
 
-
+uart_val =[0]
+loadOBJ.uart_val[:] = uart_val
 def main():
+    global uart_val
     load_map_settings(in_folder + '/3dmap_set.txt')
     is_hand_hist_created = False
     x = 0
@@ -222,30 +230,34 @@ def main():
     ax.set_xlim3d(0, final_scale)
     ax.set_ylim3d(0, final_scale)
     ax.set_zlim3d(0, final_scale)
-    local = True
+    local = False
     ax = plt.axes(projection='3d')
     
    #UART thread
-    uart_val =[0]
+   
     uart_t = threading.Thread(target=uart.cont_get_value, args=(uart_val,)) 
     uart_t.daemon = True
-    #uart_t.start()
+    uart_t.start()
     
     model = dust('10.138.50.226')
     model.clear()
-    #model.reply()
     lNode = 0
     count = 0
     model_t = threading.Thread(target=model.reply)
     model_t.daemon = True
     model_t.start()
-    loadOBJ.obj_t.start()
+    obj_t = threading.Thread(target=loadOBJ.pyglet.app.run)
+    obj_t.daemon = True
+    obj_t.start()
+    if os.path.exists('./hand_hist.npy'):
+        hand_hist = np.load('./hand_hist.npy')
+        is_hand_hist_created = True
     for frame in camera.capture_continuous(capture, format="bgra", use_video_port=True, resize=(img_width,img_height)):
        
         t1 = datetime.now()
 #        imgLeft_gr, imgRight_gr = get_grayscale_lr_images(frame, img_height, img_width)
         imgRight, imgLeft = get_rgb_lr_images(frame, img_height, img_width)
-        
+       # uart_val[0] = uart.get_value()
 #        pair_img = cv2.cvtColor (frame, cv2.COLOR_BGR2GRAY)
 #        imgLeft_gr = pair_img [0:img_height,0:int(img_width/2)] #Y+H and X+W
 #        imgRight_gr = pair_img [0:img_height,int(img_width/2):img_width] #Y+H and X+W
@@ -255,7 +267,7 @@ def main():
 #        rectified_pair = calibration.rectify((imgLeft, imgRight))
         # capture frames from the camera
         pressed_key = cv2.waitKey(1)
-
+    
         #disparity, ft, gs = stereo_depth_map(rectified_pair_gr)
         
         if ((uart_val[0] & 0x01) == 0x01) or (pressed_key & 0xFF == ord('z')) and (not is_hand_hist_created):
@@ -277,6 +289,7 @@ def main():
             draw_point = gui_coords_lib.get_normed_3d_coord(far_point, imgLeft.shape, gs, 1, rel_tp)
          
             count, lNode = gui_coords_lib.render_drawing(model, draw_point, uart_val[0], count,lNode, pressed_key)
+            uart_val[:] = [0x00]
             # show the frame
             #cv2.imshow("left", imgLeft_gr)
             #cv2.imshow("right", imgRight_gr)
@@ -288,6 +301,10 @@ def main():
             #show_frame = ft
         if (uart_val[0] & 0x08) == 0x08:
             break
+        if(not obj_t.is_alive()):
+            obj_t = threading.Thread(target=loadOBJ.pyglet.app.run)
+            obj_t.daemon = True
+            obj_t.start()
         cv2.imshow("Livestream Finger Tracking", show_frame)
     model.close()
 if __name__ == "__main__":

@@ -51,7 +51,7 @@ def render_drawing(model, draw_point, uart_val,count, lNode, pressed_key=0xff):
     if(lNode == 0):
         lNode = model.genId()
         model.add_n_node(lNode, draw_point[0], draw_point[1], draw_point[2], .01)
-    elif((uart_val & 0x02)== 0x02  or (pressed_key & 0xFF == ord('1'))):
+    elif((uart_val & 0x01)== 0x01  or (pressed_key & 0xFF == ord('1'))):
         nNode = model.genId()
         model.add_a_node(nNode, lNode, draw_point[0], draw_point[1], draw_point[2], .01)
         model.add_edge(lNode,nNode)

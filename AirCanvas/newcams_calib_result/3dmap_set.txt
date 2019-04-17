@@ -7,5 +7,5 @@
     "speckleRange":12,
     "speckleWindowSize":142,
     "textureThreshold":49,
-    "uniquenessRatio":9
+    "uniquenessRatio":0
 }
