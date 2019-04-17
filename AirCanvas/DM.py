@@ -86,6 +86,7 @@ cv2.namedWindow("Image")
 cv2.moveWindow("Image", 0,0)
 #cv2.resizeWindow("Image", cam_width, cam_height)
 cv2.namedWindow("Livestream Finger Tracking")
+cv2.moveWindow("Livestream Finger Tracking", 0, 0)
 #cv2.namedWindow("left")
 #cv2.moveWindow("left", 450,100)
 #cv2.namedWindow("right")
@@ -109,7 +110,6 @@ def stereo_depth_map(rectified_pair):
     #      '\nDisparity grayscae:', disparity_grayscale.shape, '\n')
     view_img = cv2.resize(disparity_color, None, fx=2, fy=2)
     cv2.imshow("Image", view_img)
-    #cv2.imshow("Image", disparity_color)
     key = cv2.waitKey(1) & 0xFF   
     if key == ord("q"):
         quit();
@@ -306,6 +306,7 @@ def main():
             obj_t.daemon = True
             obj_t.start()
         cv2.imshow("Livestream Finger Tracking", show_frame)
+        cv2.moveWindow("Livestream Finger Tracking", show_frame.shape[0], 0)
     model.close()
 if __name__ == "__main__":
     main()

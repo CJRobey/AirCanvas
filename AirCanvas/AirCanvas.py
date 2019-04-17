@@ -44,24 +44,26 @@ def producer(uart_val, q):
         #cv2.imshow("right", imgRight_gr)
         if (uart_val[0] & 0x08) == 0x08 or (pressed_key & 0xFF == ord('q')):
             break
+
         show_frame = cv2.resize(show_frame, None, fx=2, fy=2)
-        cv2.imshow("Livestream Finger Tracking", show_frame)       
+        cv2.imshow("Livestream Finger Tracking", show_frame)      
+        cv2.moveWindow("Livestream Finger Tracking", disparity.shape[1]*2, 0)
 
 
 def consumer(uart_val,q, uart_lock):
     global pressed_key 
-    model = dust('10.138.255.159')
+    model = dust('10.138.50.226')
     model.clear()
     #model.reply()
     lNode = 0
-    count = 0
+    size = 0.02
     model_t = threading.Thread(target=model.reply)
     model_t.daemon = True
     model_t.start()
     
     while((uart_val[0] & 0x08) != 0x08):
         draw_point = q.get()
-        count, lNode = gui_coords_lib.render_drawing(model, draw_point, uart_val[0], count,lNode, pressed_key)
+        size, lNode = gui_coords_lib.render_drawing(model, draw_point, uart_val[0], size,lNode, pressed_key)
         if (uart_val[0] & 0x08) == 0x08 or (pressed_key & 0xFF == ord('q')):
             break
         uart_lock.acquire()
