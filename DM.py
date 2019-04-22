@@ -287,7 +287,7 @@ def main():
         
         if (uart_val[0] & 0x08) == 0x08:
             break
-        
+        uart_val[:] = [0] 
         cv2.imshow("Livestream Finger Tracking", show_frame)
     #model.close()
 

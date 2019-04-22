@@ -60,7 +60,12 @@ class dust:
            # return reply_
         #return self.reply()
         return 1
-
+    def undo(self):
+        self.s.send(binascii.hexlify("undo".encode('utf8'))+ "\0".encode('utf8'))
+        
+    def redo(self):
+        self.s.send(binascii.hexlify("redo".encode('utf8'))+ "\0".encode('utf8'))
+        
     def clear(self):
             return self.s.send(binascii.hexlify("new".encode('utf8'))+ "\0".encode('utf8'))
     #reply_ = bytes()

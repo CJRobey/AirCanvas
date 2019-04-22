@@ -13,7 +13,7 @@ def get_value(port=serial.Serial("/dev/serial0", baudrate=9600, timeout=3.0)):
 
 def cont_get_value(uart_val):
     while(True):
-        uart_val[0] = get_value()
+        uart_val[:] = [get_value()]
 
 def main():
     while True:

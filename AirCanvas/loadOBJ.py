@@ -36,8 +36,8 @@ def on_draw():
 
     glTranslated(0.0, 0.0, -3.0)
     glRotatef(rotation, 0.0, 1.0, 0.0)
-    glRotatef(-25.0, 1.0, 0.0, 0.0)
-    glRotatef(45.0, 0.0, 0.0, 1.0)
+    glRotatef(0.0, 1.0, 0.0, 0.0)
+    glRotatef(0.0, 0.0, 0.0, 1.0)
 
     glEnable(GL_LIGHTING)
     meshes = pywavefront.Wavefront("model.obj")

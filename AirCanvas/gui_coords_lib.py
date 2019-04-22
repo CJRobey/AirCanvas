@@ -45,18 +45,17 @@ def get_normed_3d_coord(far_point, frame_shape, gs, final_scale=1, rel_tp = None
     return draw_point
 
 
-def render_drawing(model, draw_point, uart_val,count, lNode, pressed_key=0xff):
+def render_drawing(model, draw_point, uart_val,size, lNode, pressed_key=0xff):
 #Dust 3d code using model
     
     if(lNode == 0):
         lNode = model.genId()
-        model.add_n_node(lNode, draw_point[0], draw_point[1], draw_point[2], .01)
+        model.add_n_node(lNode, draw_point[0], draw_point[1], draw_point[2], size)
     elif((uart_val & 0x01)== 0x01  or (pressed_key & 0xFF == ord('1'))):
         nNode = model.genId()
-        model.add_a_node(nNode, lNode, draw_point[0], draw_point[1], draw_point[2], .01)
+        model.add_a_node(nNode, lNode, draw_point[0], draw_point[1], draw_point[2], size)
         model.add_edge(lNode,nNode)
         lNode = nNode
-        count += 1
         #model.reply()
    # elif((uart_val & 0x01) == 0x01):
         #export = model.exportAsObj(1)
@@ -67,4 +66,16 @@ def render_drawing(model, draw_point, uart_val,count, lNode, pressed_key=0xff):
         #    print("take 2")
     elif((uart_val & 0x04) == 0x04 or (pressed_key & 0xFF == ord('2'))):
         lNode = 0
-    return count, lNode       
+    elif((uart_val & 0x02) == 0x02):
+        model.clear()
+    elif((uart_val & 0x40) == 0x40):
+        size -= .01
+        if(size < .01):
+            size = .01
+    elif((uart_val & 0x80) == 0x80):
+        size+= .01
+        if(size > .1):
+            size = .1
+
+
+    return size, lNode       
