@@ -1,27 +1,6 @@
-# Copyright (C) 2019 Eugene Pomazov, <stereopi.com>, virt2real team
-#
-# This file is part of StereoPi tutorial scripts.
-#
-# StereoPi tutorial is free software: you can redistribute it 
-# and/or modify it under the terms of the GNU General Public License
-# as published by the Free Software Foundation, either version 3 of the 
-# License, or (at your option) any later version.
-#
-# StereoPi tutorial is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with StereoPi tutorial.  
-# If not, see <http://www.gnu.org/licenses/>.
-#
-# Most of this code is updated version of 3dberry.org project by virt2real
-# 
-# Thanks to Adrian and http://pyimagesearch.com, as there are lot of
-# code in this tutorial was taken from his lessons.
-# 
-
+# credit to https://github.com/realizator/stereopi-tutorial 
+# for scripts to get the calibration parameters and for 
+# details on how to do the implementation of the depth map
 
 from picamera import PiCamera
 import time
@@ -39,8 +18,10 @@ import gui_coords_lib
 import uart 
 import loadOBJ
 import os
+
 global camera
 # Depth map default preset
+# but this won't be used if the calibration folder exists
 SWS = 5
 PFS = 5
 PFC = 29
