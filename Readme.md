@@ -19,7 +19,7 @@ calebrobey118@gmail.com
 
 ## Authors
 
-Evan Gruda
+Evan Gruda<br/>
 Caleb Robey
 
 ## Acknowledgments
